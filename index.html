@@ -219,6 +219,18 @@
     .cell.error-cell {
       background: var(--conflict) !important;
       color: var(--conflict-text) !important;
+      position: relative;
+    }
+
+    .cell.error-cell::after {
+      content: '';
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 50%;
+      height: 2px;
+      background: var(--error);
+      transform: translateY(-50%);
     }
 
     .cell.selected {
@@ -1330,22 +1342,12 @@
 
     function checkPuzzle() {
       if (gameWon) return;
-      let errors = 0;
+      document.querySelectorAll('.cell.error-cell').forEach(c => c.classList.remove('error-cell'));
+      
       for (let i = 0; i < 81; i++) {
         if (board[i] !== 0 && board[i] !== solution[i]) {
-          errors++;
           document.querySelector(`.cell[data-index="${i}"]`).classList.add('error-cell');
         }
-      }
-
-      setTimeout(() => {
-        document.querySelectorAll('.cell.error-cell').forEach(c => c.classList.remove('error-cell'));
-      }, 1500);
-
-      if (errors === 0) {
-        alert('Looking good!');
-      } else {
-        alert(`Found ${errors} error${errors > 1 ? 's' : ''}`);
       }
     }
 
@@ -1459,6 +1461,9 @@
       document.getElementById('check-puzzle-btn').addEventListener('click', () => {
         checkPuzzle();
         document.getElementById('menu-dropdown').classList.remove('visible');
+        setTimeout(() => {
+          document.querySelectorAll('.cell.error-cell').forEach(c => c.classList.remove('error-cell'));
+        }, 2500);
       });
 
       document.getElementById('reveal-cell-btn').addEventListener('click', () => {
@@ -1492,6 +1497,13 @@
         saveSetting('autoCandidate', e.target.checked);
         mode = e.target.checked ? 'candidate' : 'normal';
         document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        
+        if (e.target.checked) {
+          initCandidates();
+        } else {
+          for (let i = 0; i < 81; i++) notes[i].clear();
+        }
+        renderGrid();
       });
       document.getElementById('setting-showErrorCounter').addEventListener('change', e => saveSetting('showErrorCounter', e.target.checked));
       document.getElementById('setting-showTimer').addEventListener('change', e => saveSetting('showTimer', e.target.checked));
@@ -1503,6 +1515,13 @@
         saveSetting('autoCandidate', e.target.checked);
         mode = e.target.checked ? 'candidate' : 'normal';
         document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        
+        if (e.target.checked) {
+          initCandidates();
+        } else {
+          for (let i = 0; i < 81; i++) notes[i].clear();
+        }
+        renderGrid();
       });
 
       document.addEventListener('keydown', e => {

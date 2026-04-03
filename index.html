@@ -233,6 +233,18 @@
       transform: translateY(-50%);
     }
 
+    .cell.conflict-dot::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 6px;
+      height: 6px;
+      background: var(--error);
+      border-radius: 50%;
+      z-index: 10;
+    }
+
     .cell.selected {
       background: var(--selected) !important;
       box-shadow: inset 0 0 0 2px var(--selected-border);
@@ -1070,7 +1082,7 @@
       const val = board[idx];
       const isGiven = given[idx] !== 0;
 
-      cell.classList.remove('given', 'has-note', 'wrong', 'error-cell');
+      cell.classList.remove('given', 'has-note', 'wrong', 'error-cell', 'conflict-dot');
 
       if (isGiven) {
         // textContent only — no CSS pseudo-element to avoid double-render
@@ -1092,6 +1104,12 @@
         cell.textContent = val || '';
         if (settings.checkGuesses && val !== 0 && val !== solution[idx]) {
           cell.classList.add('wrong');
+        }
+        
+        // Add red dot if this cell conflicts with peers (same number in row/col/box)
+        if (val !== 0 && !isGiven) {
+          const hasConflict = SudokuGenerator.peers[idx].some(p => board[p] === val);
+          if (hasConflict) cell.classList.add('conflict-dot');
         }
       }
     }

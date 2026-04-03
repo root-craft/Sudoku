@@ -1331,12 +1331,14 @@
       const cell = document.querySelector(`.cell[data-index="${selected}"]`);
       if (board[selected] === 0) return;
 
+      cell.classList.remove('error-cell');
+      
       if (board[selected] === solution[selected]) {
         cell.classList.add('check-valid');
         setTimeout(() => cell.classList.remove('check-valid'), 300);
       } else {
-        cell.classList.add('check-invalid');
-        setTimeout(() => cell.classList.remove('check-invalid'), 300);
+        cell.classList.add('error-cell');
+        setTimeout(() => cell.classList.remove('error-cell'), 2500);
       }
     }
 

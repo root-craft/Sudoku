@@ -35,6 +35,7 @@ function initApp() {
   updateErrorCount();
   startTimer();
   hideModal('win-modal');
+  selectCell(0);
 
   setupEventListeners();
 }
@@ -60,6 +61,7 @@ function setupEventListeners() {
         updateErrorCount();
         startTimer();
         hideModal('win-modal');
+        selectCell(0);
       }
     });
   });
@@ -95,6 +97,7 @@ function setupEventListeners() {
         updateErrorCount();
         startTimer();
         hideModal('win-modal');
+        selectCell(0);
       }
     });
   }
@@ -178,6 +181,7 @@ function setupEventListeners() {
         updateErrorCount();
         startTimer();
         hideModal('win-modal');
+        selectCell(0);
       }
     });
   }

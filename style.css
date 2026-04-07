@@ -1,0 +1,620 @@
+:root {
+  --bg: #fafaf8;
+  --bg2: #f2f1ec;
+  --bg3: #e8e6df;
+  --text: #1a1a18;
+  --text2: #5a5955;
+  --text3: #9a9890;
+  --border: #d4d2cb;
+  --border2: #b8b6ae;
+  --cell-bg: #ffffff;
+  --cell-given: #f0efe9;
+  --accent: #e8650a;
+  --accent-light: #fef0e6;
+  --highlight-row: #f5f4ee;
+  --highlight-box: #eceae2;
+  --conflict: #fde8e8;
+  --conflict-text: #c0392b;
+  --selected: #fff3e8;
+  --selected-border: #e8650a;
+  --btn-bg: #f2f1ec;
+  --btn-hover: #e8e6df;
+  --error: #e74c3c;
+  --success: #27ae60;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 540px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.date {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.controls-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.difficulty-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.difficulty-tabs button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.difficulty-tabs button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.difficulty-tabs button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.difficulty-tabs button:not(:last-child) {
+  border-right: none;
+}
+
+.difficulty-tabs button.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.difficulty-tabs button:hover:not(.active) {
+  background: var(--btn-hover);
+}
+
+.timer {
+  font-size: 14px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timer.paused {
+  color: var(--text3);
+}
+
+.timer.hidden {
+  display: none;
+}
+
+.timer button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  color: var(--text2);
+}
+
+.timer button:hover {
+  color: var(--text);
+}
+
+.controls-right {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+
+.icon-btn:hover {
+  background: var(--btn-hover);
+  color: var(--text);
+}
+
+.main-layout {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.grid-wrapper {
+  position: relative;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(9, 48px);
+  grid-template-rows: repeat(9, 48px);
+  border: 2px solid var(--text);
+  background: var(--border);
+  gap: 1px;
+}
+
+.cell {
+  background: var(--cell-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.cell.given {
+  background: var(--cell-given);
+}
+
+.cell:not(.given) {
+  color: var(--accent);
+}
+
+.cell.wrong {
+  color: var(--error);
+}
+
+.cell.error-cell {
+  background: var(--conflict) !important;
+  color: var(--conflict-text) !important;
+  position: relative;
+}
+
+.cell.error-cell::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 2px;
+  background: var(--error);
+  transform: translateY(-50%);
+}
+
+.cell.conflict-dot::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: var(--error);
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.cell.selected {
+  background: var(--selected) !important;
+  box-shadow: inset 0 0 0 2px var(--selected-border);
+  z-index: 5;
+}
+
+.cell.highlight-row {
+  background: var(--highlight-row);
+}
+
+.cell.highlight-box {
+  background: var(--highlight-box);
+}
+
+.cell.highlight-same {
+  background: var(--accent-light);
+}
+
+.cell.highlight-conflict {
+  background: var(--conflict);
+}
+
+.cell.selected.highlight-row,
+.cell.selected.highlight-box,
+.cell.selected.highlight-same {
+  background: var(--selected) !important;
+}
+
+.cell.selected.highlight-conflict {
+  background: var(--selected) !important;
+}
+
+.cell.has-note {
+  font-size: 9px;
+  line-height: 1;
+}
+
+.cell .notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+}
+
+.cell .note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text2);
+}
+
+.cell .note.active {
+  color: var(--accent);
+}
+
+.cell.border-right {
+  border-right: 2px solid var(--border2);
+}
+
+.cell.border-bottom {
+  border-bottom: 2px solid var(--border2);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 90px;
+}
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mode-toggle button {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  background: var(--btn-bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-toggle button.active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.mode-toggle button:hover:not(.active) {
+  background: var(--btn-hover);
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.numpad button {
+  width: 28px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.numpad button:hover {
+  background: var(--btn-hover);
+}
+
+.numpad button.dimmed {
+  opacity: 0.4;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-buttons button {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.action-buttons button:hover {
+  background: var(--btn-hover);
+}
+
+.action-buttons button svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.checkbox-option input {
+  accent-color: var(--accent);
+}
+
+.error-counter {
+  font-size: 11px;
+  color: var(--error);
+  display: none;
+}
+
+.error-counter.visible {
+  display: block;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.2s;
+}
+
+.modal-overlay.visible .modal {
+  transform: scale(1);
+}
+
+.modal h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.modal p {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 16px;
+}
+
+.modal button {
+  padding: 10px 24px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.modal button:hover {
+  opacity: 0.9;
+}
+
+.modal button.secondary {
+  background: var(--btn-bg);
+  color: var(--text);
+  margin-left: 8px;
+}
+
+.modal button.secondary:hover {
+  background: var(--btn-hover);
+}
+
+.win-modal .icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.win-modal .stats {
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+.settings-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.settings-group h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  display: none;
+}
+
+.dropdown-menu.visible {
+  display: block;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-menu button:hover {
+  background: var(--btn-hover);
+}
+
+.dropdown-menu button.danger {
+  color: var(--error);
+}
+
+.dropdown-menu button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.paused-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text2);
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s;
+}
+
+.paused-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cell.hint-reveal {
+  animation: hintPulse 0.5s ease-out;
+}
+
+@keyframes hintPulse {
+  0% { background: var(--accent); }
+  100% { background: var(--cell-bg); }
+}
+
+.cell.check-valid {
+  animation: checkPulse 0.3s ease-out;
+}
+
+@keyframes checkPulse {
+  50% { box-shadow: inset 0 0 0 2px var(--success); }
+}
+
+.cell.check-invalid {
+  animation: checkInvalidPulse 0.3s ease-out;
+}
+
+@keyframes checkInvalidPulse {
+  50% { box-shadow: inset 0 0 0 2px var(--error); }
+}

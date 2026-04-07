@@ -1,5 +1,6 @@
 import { enterNumber, clearCell, selectCell, doUndo } from '../game/actions.js';
 import { getState } from '../game/state.js';
+import { togglePause } from '../game/timer.js';
 
 export function updateNumpadDim() {
   const state = getState();
@@ -75,6 +76,9 @@ export function handleKeydown(e) {
   } else if (e.ctrlKey && e.key === 'z') {
     e.preventDefault();
     doUndo();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    togglePause();
   }
 }
 

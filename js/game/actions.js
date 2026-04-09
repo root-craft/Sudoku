@@ -6,13 +6,50 @@ import { updateCellDisplay, renderGrid } from '../ui/render.js';
 import { applyHighlights } from '../ui/highlights.js';
 import { updateNumpadDim } from '../ui/input.js';
 import { getSettings } from '../storage/settings.js';
+import { saveProgress } from '../storage/progress.js';
 import { CELL_COUNT } from '../core/grid.js';
 
 export function enterNumber(n) {
   const state = getState();
   const settings = getSettings();
 
-  if (state.selected < 0 || state.gameWon) return;
+  if (state.gameWon) return;
+
+  // ── Multi-select mode ────────────────────────────────────────────────────
+  if (state.selectedCells && state.selectedCells.length > 0) {
+    saveState();
+    state.selectedCells.forEach(idx => {
+      if (state.given[idx] !== 0) return; // skip given clues
+      if (state.mode === 'candidate') {
+        if (state.board[idx] !== 0) state.board[idx] = 0;
+        if (state.notes[idx].has(n)) {
+          state.notes[idx].delete(n);
+        } else {
+          state.notes[idx].add(n);
+        }
+      } else {
+        state.notes[idx].clear();
+        state.board[idx] = n;
+        if (settings.checkGuesses && n !== state.solution[idx]) {
+          incrementErrorCount();
+        }
+        if (settings.autoCandidate) {
+          removeCandidateFromPeers(idx, n);
+        }
+      }
+      const cell = document.querySelector(`.cell[data-index="${idx}"]`);
+      if (cell) updateCellDisplay(cell, idx);
+    });
+    const errorCountEl = document.getElementById('error-count');
+    if (errorCountEl) errorCountEl.textContent = state.errorCount;
+    updateNumpadDim();
+    checkWin();
+    saveProgress();
+    return;
+  }
+
+  // ── Single-cell mode ─────────────────────────────────────────────────────
+  if (state.selected < 0) return;
   if (state.given[state.selected] !== 0) return;
 
   saveState();
@@ -46,12 +83,31 @@ export function enterNumber(n) {
 
   updateNumpadDim();
   checkWin();
+  saveProgress();
 }
 
 export function clearCell() {
   const state = getState();
 
-  if (state.selected < 0 || state.gameWon) return;
+  if (state.gameWon) return;
+
+  // ── Multi-select mode ────────────────────────────────────────────────────
+  if (state.selectedCells && state.selectedCells.length > 0) {
+    saveState();
+    state.selectedCells.forEach(idx => {
+      if (state.given[idx] !== 0) return;
+      state.board[idx] = 0;
+      state.notes[idx].clear();
+      const cell = document.querySelector(`.cell[data-index="${idx}"]`);
+      if (cell) updateCellDisplay(cell, idx);
+    });
+    updateNumpadDim();
+    saveProgress();
+    return;
+  }
+
+  // ── Single-cell mode ─────────────────────────────────────────────────────
+  if (state.selected < 0) return;
   if (state.given[state.selected] !== 0) return;
 
   saveState();
@@ -63,6 +119,7 @@ export function clearCell() {
   if (cell) updateCellDisplay(cell, state.selected);
 
   updateNumpadDim();
+  saveProgress();
 }
 
 export function doUndo() {
@@ -173,6 +230,10 @@ export function selectCell(idx) {
   const state = getState();
   if (state.gameWon) return;
 
+  // Always clear multi-selection when explicitly selecting a single cell
+  document.querySelectorAll('.cell.multi-selected').forEach(c => c.classList.remove('multi-selected'));
+  state.selectedCells = [];
+
   document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
 
   if (idx >= 0) {
@@ -185,5 +246,34 @@ export function selectCell(idx) {
     document.querySelectorAll('.cell').forEach(c => {
       c.classList.remove('highlight-row', 'highlight-box', 'highlight-same', 'highlight-conflict');
     });
+  }
+}
+
+// ── Multi-select helpers ──────────────────────────────────────────────────────
+
+/** Removes the multi-selected class from every cell and empties the array. */
+export function clearMultiSelect() {
+  const state = getState();
+  document.querySelectorAll('.cell.multi-selected').forEach(c => c.classList.remove('multi-selected'));
+  state.selectedCells = [];
+}
+
+/**
+ * Toggles a cell in/out of the multi-select set.
+ * The primary .selected cell is not affected.
+ */
+export function toggleMultiSelect(idx) {
+  const state = getState();
+  if (state.gameWon) return;
+
+  const pos = state.selectedCells.indexOf(idx);
+  const cell = document.querySelector(`.cell[data-index="${idx}"]`);
+
+  if (pos >= 0) {
+    state.selectedCells.splice(pos, 1);
+    if (cell) cell.classList.remove('multi-selected');
+  } else {
+    state.selectedCells.push(idx);
+    if (cell) cell.classList.add('multi-selected');
   }
 }

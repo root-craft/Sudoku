@@ -136,6 +136,7 @@ export function doUndo() {
     applyHighlights();
   }
   updateNumpadDim();
+  saveProgress(); // persist the rolled-back board so refresh reflects the undo
   return true;
 }
 
@@ -162,6 +163,7 @@ export function getHint() {
 
   updateNumpadDim();
   checkWin();
+  saveProgress();
 }
 
 export function revealCell() {
@@ -178,6 +180,7 @@ export function revealCell() {
 
   updateNumpadDim();
   checkWin();
+  saveProgress();
 }
 
 export function revealPuzzle() {

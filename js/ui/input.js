@@ -1,4 +1,4 @@
-import { enterNumber, clearCell, selectCell, doUndo } from '../game/actions.js';
+import { enterNumber, clearCell, selectCell, doUndo, clearMultiSelect, toggleMultiSelect } from '../game/actions.js';
 import { getState } from '../game/state.js';
 import { togglePause } from '../game/timer.js';
 
@@ -17,8 +17,15 @@ export function updateNumpadDim() {
 
 export function handleCellClick(e) {
   const cell = e.target.closest('.cell');
-  if (cell) {
-    selectCell(parseInt(cell.dataset.index));
+  if (!cell) return;
+  const idx = parseInt(cell.dataset.index);
+
+  if (e.shiftKey) {
+    // Shift+Click: add/remove from the multi-select pool
+    toggleMultiSelect(idx);
+  } else {
+    // Normal click: single-cell selection (clears multi-select internally)
+    selectCell(idx);
   }
 }
 
@@ -50,10 +57,7 @@ export function handleKeydown(e) {
   if (settingsModal && settingsModal.classList.contains('visible')) return;
 
   const state = getState();
-
-  if (state.selected < 0 && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-    return;
-  }
+  const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
   if (e.key >= '1' && e.key <= '9') {
     e.preventDefault();
@@ -61,18 +65,22 @@ export function handleKeydown(e) {
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
     e.preventDefault();
     clearCell();
-  } else if (e.key === 'ArrowUp' && state.selected >= 9) {
+  } else if (arrowKeys.includes(e.key)) {
     e.preventDefault();
-    selectCell(state.selected - 9);
-  } else if (e.key === 'ArrowDown' && state.selected < 72) {
-    e.preventDefault();
-    selectCell(state.selected + 9);
-  } else if (e.key === 'ArrowLeft' && state.selected % 9 > 0) {
-    e.preventDefault();
-    selectCell(state.selected - 1);
-  } else if (e.key === 'ArrowRight' && state.selected % 9 < 8) {
-    e.preventDefault();
-    selectCell(state.selected + 1);
+    clearMultiSelect();
+
+    if (state.selected < 0) {
+      // Nothing selected: jump to the centre of the board
+      selectCell(40);
+    } else {
+      const cur = state.selected;
+      let next = cur;
+      if      (e.key === 'ArrowRight') next = (cur + 1)       % 81;  // wraps row → next row
+      else if (e.key === 'ArrowLeft')  next = (cur + 80)      % 81;  // wraps row → prev row
+      else if (e.key === 'ArrowDown')  next = (cur + 9)       % 81;  // wraps col bottom → top
+      else if (e.key === 'ArrowUp')    next = (cur - 9 + 81)  % 81;  // wraps col top → bottom
+      selectCell(next);
+    }
   } else if (e.ctrlKey && e.key === 'z') {
     e.preventDefault();
     doUndo();

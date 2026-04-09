@@ -1,5 +1,5 @@
 import { newGame, getState, setMode, restoreGame } from './game/state.js';
-import { startTimer, togglePause } from './game/timer.js';
+import { startTimer, togglePause, setTimerSeconds } from './game/timer.js';
 import { renderGrid, updateDifficultyTabs, updateModeTabs, updateErrorCount } from './ui/render.js';
 import { applyHighlights } from './ui/highlights.js';
 import { handleCellClick, handleNumpadClick, handleKeydown, updateNumpadDim, handleClearBtn, handleUndoBtn } from './ui/input.js';
@@ -26,6 +26,8 @@ function initApp() {
   if (saved) {
     // Resume previous unfinished game
     restoreGame(saved);
+    // Seed the timer so elapsed time carries over across reloads
+    setTimerSeconds(saved.elapsedSeconds ?? 0);
   } else {
     const result = newGame('easy');
     if (!result) {

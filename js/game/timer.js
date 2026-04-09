@@ -40,6 +40,13 @@ export function getTimerSeconds() {
   return timerSec;
 }
 
+/** Seeds the timer with a previously saved elapsed value and refreshes the display. */
+export function setTimerSeconds(sec) {
+  timerSec = sec;
+  updateTimerDisplay();
+}
+
+
 function updateTimerDisplay() {
   const timerDisplay = document.getElementById('timer-display');
   if (timerDisplay) {

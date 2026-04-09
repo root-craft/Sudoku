@@ -1,4 +1,5 @@
 import { getState } from '../game/state.js';
+import { getTimerSeconds } from '../game/timer.js';
 
 const PROGRESS_KEY = 'sudokuProgress';
 
@@ -16,12 +17,13 @@ export function saveProgress() {
   }
 
   const data = {
-    board:      [...state.board],
-    given:      [...state.given],
-    solution:   [...state.solution],
-    notes:      state.notes.map(s => [...s]),
-    difficulty: state.currentDifficulty,
-    errorCount: state.errorCount,
+    board:          [...state.board],
+    given:          [...state.given],
+    solution:       [...state.solution],
+    notes:          state.notes.map(s => [...s]),
+    difficulty:     state.currentDifficulty,
+    errorCount:     state.errorCount,
+    elapsedSeconds: getTimerSeconds(),
   };
 
   try {

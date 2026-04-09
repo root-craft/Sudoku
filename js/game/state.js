@@ -9,6 +9,7 @@ const state = {
   solution: [],
   notes: [],
   selected: -1,
+  selectedCells: [],   // indices for Shift+Click multi-select
   mode: 'normal',
   currentDifficulty: 'easy',
   gameWon: false,
@@ -44,6 +45,28 @@ export function newGame(difficulty = 'easy') {
   state.solution = result.solution;
 
   return true;
+}
+
+/**
+ * Restores game state from a previously saved progress object.
+ * notes are stored as plain arrays in localStorage and must be
+ * converted back to Sets here.
+ */
+export function restoreGame(data) {
+  const settings = getSettings();
+
+  state.board = [...data.board];
+  state.given = [...data.given];
+  state.solution = [...data.solution];
+  state.notes = data.notes.map(arr => new Set(arr));
+  state.currentDifficulty = data.difficulty;
+  state.errorCount = data.errorCount;
+  state.selected = -1;
+  state.selectedCells = [];
+  state.mode = settings.autoCandidate ? 'candidate' : 'normal';
+  state.undoStack = [];
+  state.gameWon = false;
+  state.paused = false;
 }
 
 export function setSelected(idx) {

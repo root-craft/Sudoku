@@ -1,10 +1,11 @@
-import { newGame, getState, setMode } from './game/state.js';
+import { newGame, getState, setMode, restoreGame } from './game/state.js';
 import { startTimer, togglePause } from './game/timer.js';
 import { renderGrid, updateDifficultyTabs, updateModeTabs, updateErrorCount } from './ui/render.js';
 import { applyHighlights } from './ui/highlights.js';
 import { handleCellClick, handleNumpadClick, handleKeydown, updateNumpadDim, handleClearBtn, handleUndoBtn } from './ui/input.js';
 import { showModal, hideModal, applySettings } from './ui/modals.js';
 import { getSettings, loadSettings, saveSetting } from './storage/settings.js';
+import { loadProgress, clearProgress } from './storage/progress.js';
 import { enterNumber, clearCell, selectCell, doUndo, getHint, revealCell, revealPuzzle, resetPuzzle } from './game/actions.js';
 import { checkCell, checkPuzzle } from './features/validation.js';
 import { initCandidates, clearAllCandidates } from './features/notes.js';
@@ -19,16 +20,22 @@ function initApp() {
   loadSettings();
   applySettings();
 
-  const result = newGame('easy');
-  if (!result) {
-    alert('Failed to generate puzzle. Please try again.');
-    return;
+  const settings = getSettings();
+  const saved = loadProgress();
+
+  if (saved) {
+    // Resume previous unfinished game
+    restoreGame(saved);
+  } else {
+    const result = newGame('easy');
+    if (!result) {
+      alert('Failed to generate puzzle. Please try again.');
+      return;
+    }
+    if (settings.autoCandidate) initCandidates();
   }
 
   const state = getState();
-  const settings = getSettings();
-  if (settings.autoCandidate) initCandidates();
-
   renderGrid();
   updateDifficultyTabs(state.currentDifficulty);
   updateModeTabs(state.mode);
@@ -51,7 +58,8 @@ function setupEventListeners() {
     btn.addEventListener('click', () => {
       const difficulty = btn.dataset.difficulty;
       const settings = getSettings();
-      
+
+      clearProgress(); // discard old save before starting fresh
       const result = newGame(difficulty);
       if (result) {
         if (settings.autoCandidate) initCandidates();
@@ -90,6 +98,7 @@ function setupEventListeners() {
     newBtn.addEventListener('click', () => {
       const state = getState();
       const settings = getSettings();
+      clearProgress();
       const result = newGame(state.currentDifficulty);
       if (result) {
         if (settings.autoCandidate) initCandidates();
@@ -152,8 +161,10 @@ function setupEventListeners() {
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       document.getElementById('menu-dropdown').classList.remove('visible');
-      resetPuzzle();
-      startTimer();
+      if (resetPuzzle()) {
+        clearProgress(); // board is back to start; wipe the save
+        startTimer();
+      }
     });
   }
 
@@ -174,6 +185,7 @@ function setupEventListeners() {
     nextPuzzleBtn.addEventListener('click', () => {
       const state = getState();
       const settings = getSettings();
+      clearProgress();
       const result = newGame(state.currentDifficulty);
       if (result) {
         if (settings.autoCandidate) initCandidates();

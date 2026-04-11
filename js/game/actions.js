@@ -9,7 +9,7 @@ import { getSettings } from '../storage/settings.js';
 import { saveProgress } from '../storage/progress.js';
 import { CELL_COUNT } from '../core/grid.js';
 
-export function enterNumber(n) {
+export function enterNumber(n, asNote = false) {
   const state = getState();
   const settings = getSettings();
 
@@ -54,7 +54,7 @@ export function enterNumber(n) {
 
   saveState();
 
-  if (state.mode === 'candidate') {
+  if (state.mode === 'candidate' || asNote) {
     if (state.board[state.selected] !== 0) {
       state.board[state.selected] = 0;
     }

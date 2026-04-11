@@ -59,9 +59,10 @@ export function handleKeydown(e) {
   const state = getState();
   const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
-  if (e.key >= '1' && e.key <= '9') {
+  const numMatch = e.code.match(/^Digit(\d)$/);
+  if (numMatch) {
     e.preventDefault();
-    enterNumber(parseInt(e.key));
+    enterNumber(parseInt(numMatch[1]), e.shiftKey);
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
     e.preventDefault();
     clearCell();
